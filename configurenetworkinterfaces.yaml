@@ -1,0 +1,29 @@
+---
+- name: Configure Network Interfaces
+  hosts: CSR1kv
+  gather_facts: false
+  connection: local
+
+  tasks:
+    - name: Configure G0/0
+      ios_interface:
+        name: GigabitEthernet0/0
+        description: LAN Interface
+        state: present
+
+    - name: Set IPv4 address on G0/0
+      ios_config:
+        lines:
+          - ip address 192.168.132.128 255.255.255.0
+
+
+    - name: show ip interface brief
+      ios_command:
+        commands:
+         - show ip interface brief
+      register: output
+
+    - name: save output ./ios_configurations/
+      copy:
+        content: "{{ output.stdout[0] }}"
+        dest: "ios_configurations/interface_config_output_{{inventory_hostname }}.txt"
